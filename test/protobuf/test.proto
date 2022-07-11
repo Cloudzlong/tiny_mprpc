@@ -1,0 +1,16 @@
+syntax = "proto3";
+
+package fixbug;
+
+message LoginRequest
+{
+    string name = 1;
+    string pwd = 2;
+}
+
+message LoginResponse
+{
+    int32 errcode = 1;
+    string errmsg = 2;
+    bool success = 3;
+}
