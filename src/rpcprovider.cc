@@ -126,9 +126,56 @@ void RpcProvider::OnMessge(const muduo::net::TcpConnectionPtr &conn,
     std::cout << "method_name: " << method_name << std::endl;
     std::cout << "args_str: " << args_str << std::endl;
     std::cout << "======================================" << std::endl;
+
+    //获取service对象和method对象
+    auto it = m_serviceMap.find(service_name);
+    if (it == m_serviceMap.end())
+    {
+        //如果方法不存在
+        std::cout << service_name << "is not exist!" << std::endl;
+        return;
+    }
+
+    auto mit = it->second.m_methodMap.find(method_name);
+    if (mit == it->second.m_methodMap.end())
+    {
+        //如果服务提供的方法不存在
+        std::cout << service_name << ":" << method_name << "is not exists!" << std::endl;
+    }
+    google::protobuf::Service *service = it->second.m_service;      //获取service对象，对应Userservice
+    const google::protobuf::MethodDescriptor *method = mit->second; //获取method对象，对应Login方法
+
+    //生成rpc方法调用的请求request和相应response参数
+    google::protobuf::Message *request = service->GetRequestPrototype(method).New(); //生成一个新对象
+    if (!request->ParseFromString(args_str))
+    {
+        std::cout << "request parse error,content:" << args_str << std::endl;
+        return;
+    }
+
+    google::protobuf::Message *response = service->GetResponsePrototype(method).New(); //生成一个新对象
+
+    //给下面的method方法的调用，绑定一个Closure的回调函数，因为模板的实参推演失败，所以需要指定类型
+    google::protobuf::Closure *done = google::protobuf::NewCallback<RpcProvider, const muduo::net::TcpConnectionPtr &, google::protobuf::Message *>(this, &RpcProvider::SendRpcResponse, conn, response);
+    //在框架上根据远端rpc请求，调用当前rpc节点上发布的方法
+
+    //相当于UserService调用了Login方法
+    service->CallMethod(method, nullptr, request, response, done);
 }
 
 // Closure的回调操作，用于序列化rpc的相应和网络发送
 void RpcProvider::SendRpcResponse(const muduo::net::TcpConnectionPtr &conn, google::protobuf::Message *response)
 {
+    std::string response_str;
+    if (response->SerializeToString(&response_str)) // response进行序列化
+    {
+        //序列化成功后，通过网络把rpc方法执行的结果发送回rpc的调用方
+        conn->send(response_str);
+    }
+    else
+    {
+        std::cout << "Serialize response error!" << std::endl;
+    }
+    //模拟http的短链接服务，由rpcprovider主动断开连接
+    conn->shutdown();
 }
