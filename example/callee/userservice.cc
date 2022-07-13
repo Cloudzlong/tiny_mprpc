@@ -20,7 +20,7 @@ public:
     bool Login(std::string name, std::string pwd)
     {
         std::cout << "doing local service:Login" << std::endl;
-        std::cout << "name:" << name << " pwd" << pwd << std::endl;
+        std::cout << "name:" << name << " pwd:" << pwd << std::endl;
         return true;
     }
 
@@ -75,8 +75,8 @@ public:
 
         //把响应写入,包括错误码，错误信息和运行结果
         RPC::ResultCode *Code = response->mutable_reslut();
-        Code->set_errcode(1);
-        Code->set_errmsg("Login do error!");
+        Code->set_errcode(0);
+        // Code->set_errmsg("");
         response->set_success(loginresult);
 
         //执行回调操作  执行响应对象数据的序列化和网络发送

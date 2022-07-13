@@ -5,7 +5,7 @@ set(SRC_LIST
     mprpcconfig.cc 
     rpcheader.pb.cc 
     rpcprovider.cc 
-   # mprpcchannel.cc
+    mprpcchannel.cc
    # mprpccontroller.cc
    # logger.cc
    # zookeeperutil.cc
