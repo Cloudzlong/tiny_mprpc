@@ -1,7 +1,7 @@
 #include "mprpcchannel.h"
 #include "rpcheader.pb.h"
 #include "mprpcapplication.h"
-//#include "mprpccontroller.h"
+#include "mprpccontroller.h"
 //#include"zookeeperutil.h"
 #include <string>
 #include <errno.h>
@@ -50,8 +50,8 @@ void MprpcChannel::CallMethod(const google::protobuf::MethodDescriptor *method,
     }
     else
     {
-        std::cout << "serialize rpc header error!" << std::endl; //优化
-        // controller->SetFailed("serialize rpc header error!");
+        // std::cout << "serialize rpc header error!" << std::endl; //优化
+        controller->SetFailed("serialize rpc header error!");
         return;
     }
 
@@ -73,12 +73,12 @@ void MprpcChannel::CallMethod(const google::protobuf::MethodDescriptor *method,
     int clientfd = socket(AF_INET, SOCK_STREAM, 0);
     if (-1 == clientfd)
     {
-        std::cout << "create socket error! errno: " << errno << std::endl; //改用controller记录错误信息
-        exit(EXIT_FAILURE);
-        // char errtxt[512] = {0};
-        // sprintf(errtxt, "create socket error! errno: %d", errno);
-        // controller->SetFailed(errtxt);
-        // return;
+        // std::cout << "create socket error! errno: " << errno << std::endl; //改用controller记录错误信息
+        // exit(EXIT_FAILURE);
+        char errtxt[512] = {0};
+        sprintf(errtxt, "create socket error! errno: %d", errno);
+        controller->SetFailed(errtxt);
+        return;
     }
 
     //读取配置文件rpcserver的信息
@@ -119,27 +119,27 @@ void MprpcChannel::CallMethod(const google::protobuf::MethodDescriptor *method,
     if (-1 == connect(clientfd, (struct sockaddr *)&server_addr, sizeof(server_addr)))
     {
 
-        std::cout << "connect error!errno: " << errno << std::endl;
-        close(clientfd);
-        exit(EXIT_FAILURE);
+        // std::cout << "connect error!errno: " << errno << std::endl;
         // close(clientfd);
-        // char errtxt[512] = {0};
-        // sprintf(errtxt, "connect socket error! errno: %d", errno);
-        // controller->SetFailed(errtxt);
-        // return;
+        // exit(EXIT_FAILURE);
+        close(clientfd);
+        char errtxt[512] = {0};
+        sprintf(errtxt, "connect socket error! errno: %d", errno);
+        controller->SetFailed(errtxt);
+        return;
     }
 
     //发送rpc请求
     if (-1 == send(clientfd, send_rpc_str.c_str(), send_rpc_str.size(), 0))
     {
-        std::cout << "send error!errno: " << errno << std::endl;
-        close(clientfd);
-        return; //结束本次rpc调用
+        // std::cout << "send error!errno: " << errno << std::endl;
         // close(clientfd);
-        // char errtxt[512] = {0};
-        // sprintf(errtxt, "send socket error! errno: %d", errno);
-        // controller->SetFailed(errtxt);
-        // return;
+        // return; //结束本次rpc调用
+        close(clientfd);
+        char errtxt[512] = {0};
+        sprintf(errtxt, "send socket error! errno: %d", errno);
+        controller->SetFailed(errtxt);
+        return;
     }
 
     //接受rpc请求的响应值
@@ -147,14 +147,14 @@ void MprpcChannel::CallMethod(const google::protobuf::MethodDescriptor *method,
     int recv_size = 0;
     if (-1 == (recv_size = recv(clientfd, recv_buf, 1024, 0)))
     {
-        std::cout << "recv error!errno: " << errno << std::endl;
-        close(clientfd);
-        return;
+        // std::cout << "recv error!errno: " << errno << std::endl;
         // close(clientfd);
-        // char errtxt[512] = {0};
-        // sprintf(errtxt, "recv socket error! errno: %d", errno);
-        // controller->SetFailed(errtxt);
         // return;
+        close(clientfd);
+        char errtxt[512] = {0};
+        sprintf(errtxt, "recv socket error! errno: %d", errno);
+        controller->SetFailed(errtxt);
+        return;
     }
     std::cout << recv_buf << std::endl;
 
@@ -165,14 +165,14 @@ void MprpcChannel::CallMethod(const google::protobuf::MethodDescriptor *method,
     // if(!response->ParseFromString(response_str))
     if (!response->ParsePartialFromArray(recv_buf, recv_size))
     {
-        std::cout << "parse error! response_str:" << response_str << std::endl;
-        close(clientfd);
-        return;
+        // std::cout << "parse error! response_str:" << response_str << std::endl;
         // close(clientfd);
-        // char errtxt[512] = {0};
-        // sprintf(errtxt, "recv socket error! errno: %s", recv_buf);
-        // controller->SetFailed(errtxt);
         // return;
+        close(clientfd);
+        char errtxt[512] = {0};
+        sprintf(errtxt, "recv socket error! errno: %s", recv_buf);
+        controller->SetFailed(errtxt);
+        return;
     }
     close(clientfd);
 }

@@ -6,7 +6,7 @@ set(SRC_LIST
     rpcheader.pb.cc 
     rpcprovider.cc 
     mprpcchannel.cc
-   # mprpccontroller.cc
+    mprpccontroller.cc
    # logger.cc
    # zookeeperutil.cc
    )
