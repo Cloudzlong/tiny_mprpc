@@ -2,7 +2,7 @@
 #include "rpcheader.pb.h"
 #include "mprpcapplication.h"
 #include "mprpccontroller.h"
-//#include"zookeeperutil.h"
+#include "zookeeperutil.h"
 #include <string>
 #include <errno.h>
 #include <unistd.h>
@@ -88,27 +88,27 @@ void MprpcChannel::CallMethod(const google::protobuf::MethodDescriptor *method,
     /*
     rpc调用方向调用service_name服务，需要查询zk上该服务所在的host信息
     */
-    // ZkClient zkCli;
-    // zkCli.Start();
-    // std::string method_path = "/" + service_name + "/" + method_name;
+    ZkClient zkCli;
+    zkCli.Start();
+    std::string method_path = "/" + service_name + "/" + method_name;
     //获取ip地址和端口号
-    // std::string host_data=zkCli.GetData(method_path.c_str());
-    // if(host_data=="")
-    // {
-    //     controller->SetFailed(method_path+" is not exist!");
-    //     return;
-    // }
-    // int idx=host_data.find(":");//分割符
-    // if(idx==-1)
-    // {
-    //     controller->SetFailed(method_path+" address is invalid!");
-    //     return;
-    // }
-    // std::string ip=host_data.substr(0,idx);
-    // uint32_t port=atoi(host_data.substr(idx+1,host_data.size()-idx).c_str());
+    std::string host_data = zkCli.GetData(method_path.c_str());
+    if (host_data == "")
+    {
+        controller->SetFailed(method_path + " is not exist!");
+        return;
+    }
+    int idx = host_data.find(":"); //分割符
+    if (idx == -1)
+    {
+        controller->SetFailed(method_path + " address is invalid!");
+        return;
+    }
+    std::string ip = host_data.substr(0, idx);
+    uint32_t port = atoi(host_data.substr(idx + 1, host_data.size() - idx).c_str());
 
-    std::string ip = MprpcApplication::GetInstance().GetConfig().Load("rpcserverip");
-    uint32_t port = atoi(MprpcApplication::GetInstance().GetConfig().Load("rpcserverport").c_str());
+    // std::string ip = MprpcApplication::GetInstance().GetConfig().Load("rpcserverip");
+    // uint32_t port = atoi(MprpcApplication::GetInstance().GetConfig().Load("rpcserverport").c_str());
 
     struct sockaddr_in server_addr;
     server_addr.sin_family = AF_INET;
