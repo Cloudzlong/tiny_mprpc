@@ -3,8 +3,8 @@
 set(SRC_LIST 
     mprpcapplication.cc 
     mprpcconfig.cc 
-    rpcheader.pb.cc 
-    rpcprovider.cc 
+    mprpcheader.pb.cc 
+    mprpcprovider.cc 
     mprpcchannel.cc
     mprpccontroller.cc
    # logger.cc

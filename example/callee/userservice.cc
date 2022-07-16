@@ -3,7 +3,7 @@
 #include <iostream>
 #include <string>
 
-#include "rpcprovider.h"
+#include "mprpcprovider.h"
 #include "mprpcapplication.h"
 #include "../user.pb.h" //包含protobuf头文件
 
