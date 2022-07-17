@@ -2,7 +2,7 @@
 
 #include <iostream>
 #include <string>
-
+#include "logger.h"
 #include "mprpcprovider.h"
 #include "mprpcapplication.h"
 #include "../user.pb.h" //包含protobuf头文件
@@ -88,6 +88,10 @@ public:
 
 int main(int argc, char **argv)
 {
+    LOG_INFO("first INFO message");
+    LOG_INFO("%s:%s:%d", __FILE__, __FUNCTION__, __LINE__);
+    LOG_ERR("first INFO message");
+
     //先调用框架的初始化操作 provider -i config.conf，从init方法读取配置服务，比如IP地址和端口号
     MprpcApplication::Init(argc, argv);
 

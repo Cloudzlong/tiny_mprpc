@@ -1,0 +1,3 @@
+16:55:25 => [info] first INFO message
+16:55:25 => [info] /home/w/Mprpc/Tiny_mprpc/example/callee/userservice.cc:main:92
+16:55:25 => [error] first INFO message
